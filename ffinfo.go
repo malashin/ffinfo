@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -156,6 +157,28 @@ func (f *File) String() string {
 	return string(b)
 }
 
+// StreamDuration return streams duration as float64,
+// uses MKV tags if the default duration value is not found.
+func (f *File) StreamDuration(i int) (d float64, err error) {
+	if len(f.Streams)-1 < i || i < 0 {
+		return -1, errors.New("stream index is out of range")
+	}
+
+	if f.Streams[i].Duration == "" {
+		if f.Streams[i].Tags.DURATIONEng != "" {
+			return HMSMSToSeconds(f.Streams[i].Tags.DURATIONEng), nil
+		}
+		return 0, errors.New("stream has no duration metadata")
+	}
+
+	d, err = strconv.ParseFloat(f.Streams[i].Duration, 64)
+	if err != nil {
+		return -1, err
+	}
+
+	return d, nil
+}
+
 // Probe returns media file information.
 func Probe(filePath string) (f *File, err error) {
 	c := exec.Command("ffprobe",
@@ -175,4 +198,46 @@ func Probe(filePath string) (f *File, err error) {
 	}
 	json.Unmarshal(o.Bytes(), &f)
 	return f, nil
+}
+
+// HMSMSToSeconds - converts timecode (H:M:S.MS) to seconds float64 (S.MS).
+func HMSMSToSeconds(hhmmssms string) float64 {
+	var hh, mm, ss, ms float64
+	var buffer string
+	length := len(hhmmssms)
+	timecode := []string{}
+
+	for i := length - 1; i >= 0; i-- {
+		if hhmmssms[i] == '.' {
+			buffer = "." + buffer
+			ms, _ = strconv.ParseFloat(buffer, 64)
+			buffer = ""
+		} else if hhmmssms[i] == ':' {
+			timecode = append(timecode, buffer)
+			buffer = ""
+		} else if i == 0 {
+			if buffer != "" {
+				timecode = append(timecode, string(hhmmssms[i])+buffer)
+			} else {
+				timecode = append(timecode, string(hhmmssms[i]))
+			}
+		} else {
+			buffer = string(hhmmssms[i]) + buffer
+		}
+	}
+
+	length = len(timecode)
+
+	if length == 1 {
+		ss, _ = strconv.ParseFloat(timecode[0], 64)
+	} else if length == 2 {
+		ss, _ = strconv.ParseFloat(timecode[0], 64)
+		mm, _ = strconv.ParseFloat(timecode[1], 64)
+	} else if length == 3 {
+		ss, _ = strconv.ParseFloat(timecode[0], 64)
+		mm, _ = strconv.ParseFloat(timecode[1], 64)
+		hh, _ = strconv.ParseFloat(timecode[2], 64)
+	}
+
+	return hh*3600 + mm*60 + ss + ms
 }

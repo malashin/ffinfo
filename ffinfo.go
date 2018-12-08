@@ -1,8 +1,9 @@
 package ffinfo
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os/exec"
 	"time"
 )
@@ -123,15 +124,22 @@ type File struct {
 			TimedThumbnails int `json:"timed_thumbnails,omitempty"`
 		} `json:"disposition,omitempty"`
 		Tags struct {
-			CreationTime    time.Time `json:"creation_time,omitempty"`
-			Language        string    `json:"language,omitempty"`
-			Title           string    `json:"title,omitempty"`
-			HandlerName     string    `json:"handler_name,omitempty"`
-			Encoder         string    `json:"encoder,omitempty"`
-			Timecode        string    `json:"timecode,omitempty"`
-			FilePackageUmid string    `json:"file_package_umid,omitempty"`
-			FilePackageName string    `json:"file_package_name,omitempty"`
-			TrackName       string    `json:"track_name,omitempty"`
+			CreationTime                time.Time `json:"creation_time,omitempty"`
+			Language                    string    `json:"language,omitempty"`
+			Title                       string    `json:"title,omitempty"`
+			HandlerName                 string    `json:"handler_name,omitempty"`
+			Encoder                     string    `json:"encoder,omitempty"`
+			Timecode                    string    `json:"timecode,omitempty"`
+			FilePackageUmid             string    `json:"file_package_umid,omitempty"`
+			FilePackageName             string    `json:"file_package_name,omitempty"`
+			TrackName                   string    `json:"track_name,omitempty"`
+			BPSEng                      string    `json:"BPS-eng"`
+			DURATIONEng                 string    `json:"DURATION-eng"`
+			NUMBEROFFRAMESEng           string    `json:"NUMBER_OF_FRAMES-eng"`
+			NUMBEROFBYTESEng            string    `json:"NUMBER_OF_BYTES-eng"`
+			STATISTICSWRITINGAPPEng     string    `json:"_STATISTICS_WRITING_APP-eng"`
+			STATISTICSWRITINGDATEUTCEng string    `json:"_STATISTICS_WRITING_DATE_UTC-eng"`
+			STATISTICSTAGSEng           string    `json:"_STATISTICS_TAGS-eng"`
 		} `json:"tags,omitempty"`
 		SideDataList []struct {
 			SideDataType string `json:"side_data_type,omitempty"`
@@ -140,28 +148,31 @@ type File struct {
 }
 
 // Print prints out the contents of the media file.
-func (f *File) Print() {
+func (f *File) String() string {
 	b, err := json.MarshalIndent(f, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(string(b))
+	return string(b)
 }
 
 // Probe returns media file information.
-func Probe(filePath string) (f File, err error) {
-	b, err := exec.Command("ffprobe",
-		"-v", "quiet",
+func Probe(filePath string) (f *File, err error) {
+	c := exec.Command("ffprobe",
+		"-loglevel", "error",
 		"-hide_banner",
 		"-show_format",
 		"-show_streams",
 		"-print_format", "json=c=1",
-		filePath).Output()
+		filePath)
+	var o bytes.Buffer
+	var e bytes.Buffer
+	c.Stdout = &o
+	c.Stderr = &e
+	err = c.Run()
 	if err != nil {
-		return f, err
+		return f, errors.New(string(e.Bytes()))
 	}
-
-	json.Unmarshal(b, &f)
+	json.Unmarshal(o.Bytes(), &f)
 	return f, nil
 }

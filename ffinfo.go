@@ -161,14 +161,14 @@ func (f *File) String() string {
 // uses MKV tags if the default duration value is not found.
 func (f *File) StreamDuration(i int) (d float64, err error) {
 	if len(f.Streams)-1 < i || i < 0 {
-		return -1, errors.New("stream index is out of range")
+		return -1, errors.New("stream index " + strconv.Itoa(i) + " is out of [0-" + strconv.Itoa(len(f.Streams)-1) + "] range")
 	}
 
 	if f.Streams[i].Duration == "" {
 		if f.Streams[i].Tags.DURATIONEng != "" {
 			return HMSMSToSeconds(f.Streams[i].Tags.DURATIONEng), nil
 		}
-		return 0, errors.New("stream has no duration metadata")
+		return 0, errors.New("stream " + strconv.Itoa(i) + " has no duration metadata")
 	}
 
 	d, err = strconv.ParseFloat(f.Streams[i].Duration, 64)

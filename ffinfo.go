@@ -160,6 +160,10 @@ func (f *File) String() string {
 // StreamDuration return streams duration as float64,
 // uses MKV tags if the default duration value is not found.
 func (f *File) StreamDuration(i int) (d float64, err error) {
+	if len(f.Streams) < 1 {
+		return -1, errors.New("file has no streams")
+	}
+
 	if len(f.Streams)-1 < i || i < 0 {
 		return -1, errors.New("stream index " + strconv.Itoa(i) + " is out of [0-" + strconv.Itoa(len(f.Streams)-1) + "] range")
 	}

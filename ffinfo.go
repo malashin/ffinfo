@@ -176,7 +176,7 @@ func (f *File) StreamDuration(i int) (d float64, err error) {
 			return HMSMSToSeconds(f.Streams[i].Tags.DURATIONEng), nil
 		}
 		if f.Format.Duration != "" {
-			d, err = strconv.ParseFloat(f.Streams[i].Duration, 64)
+			d, err = strconv.ParseFloat(f.Format.Duration, 64)
 			if err != nil {
 				return -1, err
 			}

@@ -180,8 +180,9 @@ func (f *File) StreamDuration(i int) (d float64, err error) {
 			if err != nil {
 				return -1, err
 			}
+			return d, errors.New("stream " + strconv.Itoa(i) + " has no duration metadata, returned format duration instead")
 		}
-		return d, errors.New("stream " + strconv.Itoa(i) + " has no duration metadata")
+		return 0, errors.New("stream " + strconv.Itoa(i) + " and format have no duration metadata")
 	}
 
 	d, err = strconv.ParseFloat(f.Streams[i].Duration, 64)

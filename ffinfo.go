@@ -6,62 +6,64 @@ import (
 	"errors"
 	"os/exec"
 	"strconv"
-	"time"
 )
 
 // File represents the information about media file returned by FFprobe.
 type File struct {
-	Format struct {
-		Filename       string `json:"filename"`
-		NbStreams      int    `json:"nb_streams,omitempty"`
-		NbPrograms     int    `json:"nb_programs,omitempty"`
-		FormatName     string `json:"format_name,omitempty"`
-		FormatLongName string `json:"format_long_name,omitempty"`
-		StartTime      string `json:"start_time,omitempty"`
-		Duration       string `json:"duration,omitempty"`
-		Size           string `json:"size,omitempty"`
-		BitRate        string `json:"bit_rate,omitempty"`
-		ProbeScore     int    `json:"probe_score,omitempty"`
-		Tags           struct {
-			MajorBrand                      string    `json:"major_brand,omitempty"`
-			MinorVersion                    string    `json:"minor_version,omitempty"`
-			CompatibleBrands                string    `json:"compatible_brands,omitempty"`
-			CreationTime                    time.Time `json:"creation_time,omitempty"`
-			ComAppleFinalcutstudioMediaUUID string    `json:"com.apple.finalcutstudio.media.uuid,omitempty"`
-			Encoder                         string    `json:"encoder,omitempty"`
-			ProjectName                     string    `json:"project_name,omitempty"`
-			UID                             string    `json:"uid,omitempty"`
-			GenerationUID                   string    `json:"generation_uid,omitempty"`
-			CompanyName                     string    `json:"company_name,omitempty"`
-			ProductName                     string    `json:"product_name,omitempty"`
-			ProductVersion                  string    `json:"product_version,omitempty"`
-			ProductUID                      string    `json:"product_uid,omitempty"`
-			ModificationDate                time.Time `json:"modification_date,omitempty"`
-			ApplicationPlatform             string    `json:"application_platform,omitempty"`
-			MaterialPackageUmid             string    `json:"material_package_umid,omitempty"`
-			MaterialPackageName             string    `json:"material_package_name,omitempty"`
-			MediaType                       string    `json:"media_type,omitempty"`
-			PlaybackRequirements            string    `json:"playback_requirements,omitempty"`
-			Timecode                        string    `json:"timecode,omitempty"`
-			Title                           string    `json:"title,omitempty"`
-			Album                           string    `json:"album,omitempty"`
-			Genre                           string    `json:"genre,omitempty"`
-			Comment                         string    `json:"comment,omitempty"`
-			Track                           string    `json:"track,omitempty"`
-			Artist                          string    `json:"artist,omitempty"`
-			AlbumArtist                     string    `json:"album_artist,omitempty"`
-			Date                            time.Time `json:"date,omitempty"`
-			SortName                        string    `json:"sort_name,omitempty"`
-			Description                     string    `json:"description,omitempty"`
-			Synopsis                        string    `json:"synopsis,omitempty"`
-			Copyright                       string    `json:"copyright,omitempty"`
-			HdVideo                         string    `json:"hd_video,omitempty"`
-			Rating                          string    `json:"rating,omitempty"`
-			ITunEXTC                        string    `json:"iTunEXTC,omitempty"`
-			ITunMOVI                        string    `json:"iTunMOVI,omitempty"`
-		} `json:"tags,omitempty"`
-	} `json:"format,omitempty"`
+	Format  Format   `json:"format,omitempty"`
 	Streams []Stream `json:"streams,omitempty"`
+}
+
+// Format represents the information about media file format returned by FFprobe.
+type Format struct {
+	Filename       string `json:"filename"`
+	NbStreams      int    `json:"nb_streams,omitempty"`
+	NbPrograms     int    `json:"nb_programs,omitempty"`
+	FormatName     string `json:"format_name,omitempty"`
+	FormatLongName string `json:"format_long_name,omitempty"`
+	StartTime      string `json:"start_time,omitempty"`
+	Duration       string `json:"duration,omitempty"`
+	Size           string `json:"size,omitempty"`
+	BitRate        string `json:"bit_rate,omitempty"`
+	ProbeScore     int    `json:"probe_score,omitempty"`
+	Tags           struct {
+		MajorBrand                      string `json:"major_brand,omitempty"`
+		MinorVersion                    string `json:"minor_version,omitempty"`
+		CompatibleBrands                string `json:"compatible_brands,omitempty"`
+		CreationTime                    string `json:"creation_time,omitempty"`
+		ComAppleFinalcutstudioMediaUUID string `json:"com.apple.finalcutstudio.media.uuid,omitempty"`
+		Encoder                         string `json:"encoder,omitempty"`
+		ProjectName                     string `json:"project_name,omitempty"`
+		UID                             string `json:"uid,omitempty"`
+		GenerationUID                   string `json:"generation_uid,omitempty"`
+		CompanyName                     string `json:"company_name,omitempty"`
+		ProductName                     string `json:"product_name,omitempty"`
+		ProductVersion                  string `json:"product_version,omitempty"`
+		ProductUID                      string `json:"product_uid,omitempty"`
+		ModificationDate                string `json:"modification_date,omitempty"`
+		ApplicationPlatform             string `json:"application_platform,omitempty"`
+		MaterialPackageUmid             string `json:"material_package_umid,omitempty"`
+		MaterialPackageName             string `json:"material_package_name,omitempty"`
+		MediaType                       string `json:"media_type,omitempty"`
+		PlaybackRequirements            string `json:"playback_requirements,omitempty"`
+		Timecode                        string `json:"timecode,omitempty"`
+		Title                           string `json:"title,omitempty"`
+		Album                           string `json:"album,omitempty"`
+		Genre                           string `json:"genre,omitempty"`
+		Comment                         string `json:"comment,omitempty"`
+		Track                           string `json:"track,omitempty"`
+		Artist                          string `json:"artist,omitempty"`
+		AlbumArtist                     string `json:"album_artist,omitempty"`
+		Date                            string `json:"date,omitempty"`
+		SortName                        string `json:"sort_name,omitempty"`
+		Description                     string `json:"description,omitempty"`
+		Synopsis                        string `json:"synopsis,omitempty"`
+		Copyright                       string `json:"copyright,omitempty"`
+		HdVideo                         string `json:"hd_video,omitempty"`
+		Rating                          string `json:"rating,omitempty"`
+		ITunEXTC                        string `json:"iTunEXTC,omitempty"`
+		ITunMOVI                        string `json:"iTunMOVI,omitempty"`
+	} `json:"tags,omitempty"`
 }
 
 // Stream represents the information about media file steam returned by FFprobe.
@@ -129,22 +131,22 @@ type Stream struct {
 		TimedThumbnails int `json:"timed_thumbnails,omitempty"`
 	} `json:"disposition,omitempty"`
 	Tags struct {
-		CreationTime                time.Time `json:"creation_time,omitempty"`
-		Language                    string    `json:"language,omitempty"`
-		Title                       string    `json:"title,omitempty"`
-		HandlerName                 string    `json:"handler_name,omitempty"`
-		Encoder                     string    `json:"encoder,omitempty"`
-		Timecode                    string    `json:"timecode,omitempty"`
-		FilePackageUmid             string    `json:"file_package_umid,omitempty"`
-		FilePackageName             string    `json:"file_package_name,omitempty"`
-		TrackName                   string    `json:"track_name,omitempty"`
-		BPSEng                      string    `json:"BPS-eng"`
-		DURATIONEng                 string    `json:"DURATION-eng"`
-		NUMBEROFFRAMESEng           string    `json:"NUMBER_OF_FRAMES-eng"`
-		NUMBEROFBYTESEng            string    `json:"NUMBER_OF_BYTES-eng"`
-		STATISTICSWRITINGAPPEng     string    `json:"_STATISTICS_WRITING_APP-eng"`
-		STATISTICSWRITINGDATEUTCEng string    `json:"_STATISTICS_WRITING_DATE_UTC-eng"`
-		STATISTICSTAGSEng           string    `json:"_STATISTICS_TAGS-eng"`
+		CreationTime                string `json:"creation_time,omitempty"`
+		Language                    string `json:"language,omitempty"`
+		Title                       string `json:"title,omitempty"`
+		HandlerName                 string `json:"handler_name,omitempty"`
+		Encoder                     string `json:"encoder,omitempty"`
+		Timecode                    string `json:"timecode,omitempty"`
+		FilePackageUmid             string `json:"file_package_umid,omitempty"`
+		FilePackageName             string `json:"file_package_name,omitempty"`
+		TrackName                   string `json:"track_name,omitempty"`
+		BPSEng                      string `json:"BPS-eng"`
+		DURATIONEng                 string `json:"DURATION-eng"`
+		NUMBEROFFRAMESEng           string `json:"NUMBER_OF_FRAMES-eng"`
+		NUMBEROFBYTESEng            string `json:"NUMBER_OF_BYTES-eng"`
+		STATISTICSWRITINGAPPEng     string `json:"_STATISTICS_WRITING_APP-eng"`
+		STATISTICSWRITINGDATEUTCEng string `json:"_STATISTICS_WRITING_DATE_UTC-eng"`
+		STATISTICSTAGSEng           string `json:"_STATISTICS_TAGS-eng"`
 	} `json:"tags,omitempty"`
 	SideDataList []struct {
 		SideDataType string `json:"side_data_type,omitempty"`

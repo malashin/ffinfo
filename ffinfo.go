@@ -200,7 +200,7 @@ func (f *File) StreamDuration(i int) (d float64, err error) {
 
 // Probe returns media file information.
 func Probe(filePath string) (f *File, err error) {
-	c := exec.Command("ffprobe",
+	cmd := exec.Command("ffprobe",
 		"-loglevel", "error",
 		"-hide_banner",
 		"-show_format",
@@ -209,12 +209,14 @@ func Probe(filePath string) (f *File, err error) {
 		filePath)
 	var o bytes.Buffer
 	var e bytes.Buffer
-	c.Stdout = &o
-	c.Stderr = &e
-	err = c.Run()
-	if err != nil {
-		return f, errors.New(string(e.Bytes()))
+	cmd.Stdout = &o
+	cmd.Stderr = &e
+
+	err = cmd.Run()
+	if err != nil || len(e.Bytes()) > 0 {
+		return f, errors.New(e.String())
 	}
+
 	json.Unmarshal(o.Bytes(), &f)
 	return f, nil
 }

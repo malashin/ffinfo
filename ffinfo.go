@@ -213,11 +213,18 @@ func Probe(filePath string) (f *File, err error) {
 	cmd.Stderr = &e
 
 	err = cmd.Run()
-	if err != nil || len(e.Bytes()) > 0 {
-		return f, errors.New(e.String())
+	json.Unmarshal(o.Bytes(), &f)
+
+	// Some errors might not be fatal, not getting a valid json is treated as error instead.
+	if f.Format.Filename == "" {
+		if len(e.Bytes()) > 0 {
+			return nil, errors.New(e.String())
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	json.Unmarshal(o.Bytes(), &f)
 	return f, nil
 }
 
